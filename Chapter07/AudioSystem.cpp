@@ -278,22 +278,36 @@ namespace
 	}
 }
 
-void AudioSystem::SetListener(const Matrix4& viewMatrix)
+void AudioSystem::SetListener(const Matrix4& viewMatrix, float deltaTime)
 {
 	// Invert the view matrix to get the correct vectors
 	Matrix4 invView = viewMatrix;
 	invView.Invert();
 	FMOD_3D_ATTRIBUTES listener;
+
+	auto currentPosition = invView.GetTranslation();
+
 	// Set position, forward, up
-	listener.position = VecToFMOD(invView.GetTranslation());
+	listener.position = VecToFMOD(currentPosition);
 	// In the inverted view, third row is forward
 	listener.forward = VecToFMOD(invView.GetZAxis());
 	// In the inverted view, second row is up
 	listener.up = VecToFMOD(invView.GetYAxis());
-	// Set velocity to zero (fix if using Doppler effect)
-	listener.velocity = {0.0f, 0.0f, 0.0f};
+
+	if (deltaTime > 0.0f)
+	{
+		listener.velocity = VecToFMOD((currentPosition - mPevPosition) * (1.0f / deltaTime));
+	}
+	else
+	{
+		listener.velocity = { 0.0f, 0.0f, 0.0f };
+	}
+
+	mPevPosition = currentPosition;
+
 	// Send to FMOD
 	mSystem->setListenerAttributes(0, &listener);
+	mLowLevelSystem->set3DSettings(1.0f, 50.0f, 1.0f);
 }
 
 float AudioSystem::GetBusVolume(const std::string& name) const
