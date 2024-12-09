@@ -9,6 +9,7 @@
 #include "Actor.h"
 #include "Game.h"
 #include "Component.h"
+#include "CameraActor.h"
 #include <algorithm>
 
 Actor::Actor(Game* game)
@@ -80,6 +81,8 @@ void Actor::ComputeWorldTransform()
 {
 	if (mRecomputeWorldTransform)
 	{
+		ComputeVirtualWorldTransform();
+
 		mRecomputeWorldTransform = false;
 		// Scale, then rotate, then translate
 		mWorldTransform = Matrix4::CreateScale(mScale);
@@ -92,6 +95,21 @@ void Actor::ComputeWorldTransform()
 			comp->OnUpdateWorldTransform();
 		}
 	}
+}
+
+void Actor::ComputeVirtualWorldTransform()
+{
+	if (this == mGame->GetCameraActor()) return;
+	Vector3 playerToSound = GetPosition() - mGame->GetCameraActor()->GetPosition();
+	Vector3 cameraToSound = GetPosition() - mGame->GetCameraActor()->GetCameraPosition();
+	cameraToSound.Normalize();
+	
+	Vector3 virtualPos = playerToSound.Length() * cameraToSound;
+
+	// Scale, then rotate, then translate
+	mVirtualWorldTransform = Matrix4::CreateScale(mScale);
+	mVirtualWorldTransform *= Matrix4::CreateFromQuaternion(mRotation);
+	mVirtualWorldTransform *= Matrix4::CreateTranslation(virtualPos);
 }
 
 void Actor::AddComponent(Component* component)
