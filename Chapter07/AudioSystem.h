@@ -45,7 +45,7 @@ public:
 	void Update(float deltaTime);
 
 	// For positional audio
-	void SetListener(const Matrix4& viewMatrix);
+	void SetListener(const Matrix4& viewMatrix, float deltaTime);
 	// Control buses
 	float GetBusVolume(const std::string& name) const;
 	bool GetBusPaused(const std::string& name) const;
@@ -71,4 +71,6 @@ private:
 	FMOD::Studio::System* mSystem;
 	// FMOD Low-level system (in case needed)
 	FMOD::System* mLowLevelSystem;
+
+	Vector3 mPevPosition;
 };

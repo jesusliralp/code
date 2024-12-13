@@ -45,7 +45,9 @@ public:
 	void SetRotation(const Quaternion& rotation) { mRotation = rotation;  mRecomputeWorldTransform = true; }
 	
 	void ComputeWorldTransform();
+	void ComputeVirtualWorldTransform();
 	const Matrix4& GetWorldTransform() const { return mWorldTransform; }
+	const Matrix4& GetVirtualWorldTransform() const { return mVirtualWorldTransform; }
 
 	Vector3 GetForward() const { return Vector3::Transform(Vector3::UnitX, mRotation); }
 
@@ -64,6 +66,7 @@ private:
 
 	// Transform
 	Matrix4 mWorldTransform;
+	Matrix4 mVirtualWorldTransform;
 	Vector3 mPosition;
 	Quaternion mRotation;
 	float mScale;
